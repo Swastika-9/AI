@@ -82,3 +82,63 @@ plot_tree(dt_grid.best_estimator_,
           max_depth=3)
 plt.title("Decision Tree (Top Levels)")
 plt.show()
+
+print(X_val.columns)
+
+# Gender Recall Analysis (FINAL FIX)
+
+from sklearn.metrics import recall_score
+import matplotlib.pyplot as plt
+
+# Find gender column automatically
+gender_col = [col for col in X_val.columns if "Gender" in col][0]
+
+print("Gender column used:", gender_col)
+
+y_pred = lr_grid.predict(X_val)
+
+male_mask = X_val[gender_col] == 1
+female_mask = X_val[gender_col] == 0
+
+male_recall = recall_score(y_val[male_mask], y_pred[male_mask])
+female_recall = recall_score(y_val[female_mask], y_pred[female_mask])
+
+print("Male Recall:", male_recall)
+print("Female Recall:", female_recall)
+
+plt.figure()
+plt.bar(["Male", "Female"], [male_recall, female_recall])
+plt.title("Recall by Gender")
+plt.ylabel("Recall")
+plt.ylim(0, 1)
+plt.show()
+
+# Top 10 Feature Importance
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Get best decision tree model
+best_dt = dt_grid.best_estimator_
+
+# Create importance dataframe
+importance_df = pd.DataFrame({
+    "Feature": X_train.columns,
+    "Importance": best_dt.feature_importances_
+})
+
+# Sort
+importance_df = importance_df.sort_values(by="Importance", ascending=False)
+
+# Take Top 10
+top10 = importance_df.head(10)
+
+print(top10)
+
+# Plot
+plt.figure()
+plt.barh(top10["Feature"], top10["Importance"])
+plt.title("Top 10 Features for Dropout Prediction")
+plt.xlabel("Importance Score")
+plt.gca().invert_yaxis()
+plt.show()
